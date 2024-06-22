@@ -9,6 +9,8 @@ import {
   logger,
 } from "./deps.ts";
 import { GeneralCommandsModule } from "./commands/general.ts";
+import { TicketCommandsModule } from "./commands/tickets.ts";
+import { DB } from "https://deno.land/x/sqlite@v3.8/mod.ts";
 
 interface PulsarTicketsModule extends ApplicationCommandsModule {
   commandData: ApplicationCommandPartial[];
@@ -16,6 +18,22 @@ interface PulsarTicketsModule extends ApplicationCommandsModule {
 
 const token: string = Deno.env.get("DISCORD_TOKEN")!;
 const server: string = Deno.env.get("DISCORD_SERVER")!;
+
+export const database = new DB("pulsar_tickets.db");
+database.execute(`
+    CREATE TABLE IF NOT EXISTS tickets
+    (
+        id
+        INTEGER
+        PRIMARY
+        KEY
+        AUTOINCREMENT,
+        ticket_id
+        TEXT,
+        channel_id
+        TEXT
+    );
+`);
 
 class PulsarTickets extends Client {
   commands: Collection<string, ApplicationCommand> = new Collection<
@@ -26,9 +44,9 @@ class PulsarTickets extends Client {
   constructor() {
     super();
 
-    const generalCommandsModule = new GeneralCommandsModule();
 
-    this.interactions.loadModule(generalCommandsModule);
+    this.interactions.loadModule(new GeneralCommandsModule());
+    this.interactions.loadModule(new TicketCommandsModule());
   }
 
   @event()
