@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "dev": "deno run --watch bot.ts",
+    "fmt": "deno fmt"
+  }
+}
