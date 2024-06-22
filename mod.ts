@@ -1,60 +1,56 @@
-import {Client, Intents, Interaction, logger} from "./deps.ts";
-import {get_commands} from "./commands.ts";
-import {PulsarTicketsCommand} from "./command.types.ts";
+import {
+  ApplicationCommand,
+  ApplicationCommandPartial,
+  ApplicationCommandsModule,
+  Client,
+  Collection,
+  event,
+  Intents,
+  logger,
+} from "./deps.ts";
+import { GeneralCommandsModule } from "./commands/general.ts";
+
+interface PulsarTicketsModule extends ApplicationCommandsModule {
+  commandData: ApplicationCommandPartial[];
+}
 
 const token: string = Deno.env.get("DISCORD_TOKEN")!;
 const server: string = Deno.env.get("DISCORD_SERVER")!;
 
 class PulsarTickets extends Client {
-  commands: PulsarTicketsCommand[] = [];
+  commands: Collection<string, ApplicationCommand> = new Collection<
+    string,
+    ApplicationCommand
+  >();
 
-  constructor(update_commands: boolean = false, commands: PulsarTicketsCommand[]) {
+  constructor() {
     super();
 
-    this.commands = commands;
+    const generalCommandsModule = new GeneralCommandsModule();
 
-
-    this.on("ready", () => {
-      logger.info("Ready!");
-
-      if (update_commands) {
-        this.update_commands()
-      }
-    });
-
-    this.on("interactionCreate", async (interaction: Interaction) => {
-      if (!interaction.isApplicationCommand()) return;
-
-      const { data } = interaction;
-
-      const command = this.commands.find(cmd => cmd.name === data.name);
-      if (!command) return;
-      command.execute(interaction);
-    });
+    this.interactions.loadModule(generalCommandsModule);
   }
 
   @event()
-  ready() {
-    console.log("Ready!")
-  }
+  async ready() {
+    logger.info("Bot is ready!");
+    const modules = await this.interactions.modules;
 
-  async update_commands() {
-    const created_commands: string[] = [];
-    try {
-      for (const command of commands) {
-        await this.interactions.commands.create(command, server);
-        created_commands.push(command.name);
-      }
-    } catch (err) {
-      logger.error("Command creation failed:", err);
-    }
+    const createdCommands: string[] = [];
 
-    logger.info(`Created commands: ${created_commands.join(", ")}`);
+    modules.forEach((module) => {
+      const commandData = (module as PulsarTicketsModule).commandData;
+
+      commandData.forEach((command) => {
+        this.interactions.commands.create(command, server);
+        createdCommands.push(command.name);
+      });
+    });
+
+    logger.info(`Created commands: ${createdCommands.join(", ")}`);
   }
 }
 
-const commands = await get_commands();
-
-export const mod = new PulsarTickets(true, commands);
+export const mod = new PulsarTickets();
 
 mod.connect(token, Intents.None);
