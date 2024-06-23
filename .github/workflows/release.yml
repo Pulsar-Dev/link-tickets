@@ -17,33 +17,24 @@ jobs:
                     deno-version: v1.x
             -   name: Compile
                 run: deno task compile
-            -   name: Upload Linux binary
+            -   name: Upload binary
                 uses: actions/upload-artifact@v4
                 with:
                     name: ticket-bot-linux-x86_64
                     path: ./ticket-bot-linux-x86_64
-            -   name: Upload Windows binary
-                uses: actions/upload-artifact@v4
-                with:
-                    name: ticket-bot-windows-msvc
-                    path: ./ticket-bot-windows-msvc.exe
     upload:
         name: Upload binaries to release
         needs: compile
         runs-on: ubuntu-latest
         steps:
-            -   name: Download Linux binary artifact
+            -   name: Download binary artifact
                 uses: actions/download-artifact@v4
                 with:
                     name: ticket-bot-linux-x86_64
-            -   name: Download Windows build artifact
-                uses: actions/download-artifact@v4
-                with:
-                    name: ticket-bot-windows-msvc
             -   name: Upload binaries to release
                 uses: ncipollo/release-action@v1
                 with:
                     token: ${{ secrets.RELEASE_TOKEN }}
-                    artifacts: "ticket-bot-linux-x86_64,ticket-bot-windows-msvc.exe"
+                    artifacts: "ticket-bot-linux-x86_64"
                     artifactErrorsFailBuild: true
                     allowUpdates: true
