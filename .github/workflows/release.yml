@@ -47,17 +47,17 @@ jobs:
                         const fs = require('fs');
                         const path = require('path');
                         const { owner, repo, number: release_id } = context.repo;
-
+                    
                         const artifacts = [
                             'ticket-bot-linux-x86_64',
                             'ticket-bot-windows-msvc.exe'
                         ];
-
+                    
                         for (const artifact of artifacts) {
                             const artifactPath = path.join(process.env.GITHUB_WORKSPACE, artifact);
                             const data = fs.readFileSync(artifactPath);
-
-                            await github.action_repository.uploadReleaseAsset({
+                    
+                            await github.repos.uploadReleaseAsset({
                                 owner,
                                 repo,
                                 release_id,
