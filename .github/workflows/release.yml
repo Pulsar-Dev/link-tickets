@@ -20,15 +20,14 @@ jobs:
             - name: Upload
               uses: actions/upload-artifact@v2
               with:
-                  name: binaries
-                  path: |
-                      ./ticket-bot-linux-x86_64
-                      ./ticket-bot-windows-msvc.exe
+                  name: ticket-bot-linux-x86_64
+                  retention-days: 1
+                  path: ticket-bot-linux-x86_64
             - name: Upload to release
               uses: xresloader/upload-to-github-release@v1
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                 file: binaries
+                 file: ticket-bot-linux-x86_64
                  update_latest_release: true
 
