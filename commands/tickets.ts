@@ -4,10 +4,12 @@ import {
   ApplicationCommandPartial,
   ApplicationCommandsModule,
   ChannelTypes,
+  GuildTextChannel,
   Interaction,
   logger,
   OverwriteType,
   slash,
+  TextChannel
 } from "../deps.ts";
 import {addons as addonsJson} from "../addons.ts";
 import {Addon, TicketCreateResponse} from "../types.ts";
@@ -224,6 +226,11 @@ export class TicketCommandsModule extends ApplicationCommandsModule {
       type: OverwriteType.USER,
       allow: "1024",
     });
+
+    const addon = apiUserAddonsResponse.find((addon: APIUserAddon) => addon.id === interaction.options[0].value)
+
+    const ticketTextChannel = ticketChannel as GuildTextChannel as TextChannel;
+    await ticketTextChannel.send(`Welcome <@${interaction.user.id}>!\nThis ticket is about: **${addon?.name || "Unknown Addon?"}**\n\nPlease describe your issue and a staff member will be with you shortly.`);
 
     insert(response.id, ticketChannel.id, interaction.member.user.id);
 
