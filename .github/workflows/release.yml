@@ -28,23 +28,22 @@ jobs:
                     name: ticket-bot-windows-msvc
                     path: ./ticket-bot-windows-msvc.exe
     upload:
+        name: Upload binaries to release
         needs: compile
         runs-on: ubuntu-latest
         steps:
-            -   name: Download artifacts
+            -   name: Download Linux binary artifact
                 uses: actions/download-artifact@v4
                 with:
                     name: ticket-bot-linux-x86_64
-            -   name: Download artifacts
+            -   name: Download Windows build artifact
                 uses: actions/download-artifact@v4
                 with:
                     name: ticket-bot-windows-msvc
-            -   name: Upload Linux binary to release
+            -   name: Upload binaries to release
                 uses: ncipollo/release-action@v1
                 with:
                     token: ${{ secrets.RELEASE_TOKEN }}
-                    artifacts: |
-                        ticket-bot-linux-x86_64
-                        ticket-bot-windows-msvc
+                    artifacts: "ticket-bot-linux-x86_64,ticket-bot-windows-msvc.exe"
                     artifactErrorsFailBuild: true
                     allowUpdates: true
