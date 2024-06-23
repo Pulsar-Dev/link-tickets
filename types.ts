@@ -4,7 +4,6 @@ export interface Addon {
   shortName: string;
 }
 
-
 export interface TicketCreateResponse {
   id?: string;
   error?: string;
