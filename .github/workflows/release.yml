@@ -44,5 +44,6 @@ jobs:
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 with:
+                    token: ${{ secrets.GITHUB_TOKEN }}
                     file: ticket-bot-linux-x86_64
                     update_latest_release: true
