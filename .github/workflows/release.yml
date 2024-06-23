@@ -30,7 +30,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                  file: |
-                     ./ticket-bot-linux-x86_64
-                     ./ticket-bot-windows-msvc.exe
+                     ticket-bot-linux-x86_64
+                     ticket-bot-windows-msvc.exe
                  update_latest_release: true
 
