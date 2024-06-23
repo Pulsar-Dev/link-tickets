@@ -10,7 +10,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
             -   name: Setup Deno
                 uses: denoland/setup-deno@v1
                 with:
@@ -18,12 +18,12 @@ jobs:
             -   name: Compile
                 run: deno task compile
             -   name: Upload Linux binary
-                uses: actions/upload-artifact@v3
+                uses: actions/upload-artifact@v4
                 with:
                     name: ticket-bot-linux-x86_64
                     path: ./ticket-bot-linux-x86_64
             -   name: Upload Windows binary
-                uses: actions/upload-artifact@v3
+                uses: actions/upload-artifact@v4
                 with:
                     name: ticket-bot-windows-msvc
                     path: ./ticket-bot-windows-msvc.exe
@@ -32,18 +32,19 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Download artifacts
-                uses: actions/download-artifact@v3
+                uses: actions/download-artifact@v4
                 with:
                     name: ticket-bot-linux-x86_64
             -   name: Download artifacts
-                uses: actions/download-artifact@v3
+                uses: actions/download-artifact@v4
                 with:
                     name: ticket-bot-windows-msvc
             -   name: Upload artifacts to release
                 uses: xresloader/upload-to-github-release@v1
                 env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
                 with:
-                    token: ${{ secrets.GITHUB_TOKEN }}
+                    token: ${{ secrets.RELEASE_TOKEN }}
                     file: ticket-bot-linux-x86_64
                     update_latest_release: true
+                    target_repo: 'Pulsar-Dev/link-tickets'
