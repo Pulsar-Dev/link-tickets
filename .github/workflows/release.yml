@@ -40,11 +40,9 @@ jobs:
                 with:
                     name: ticket-bot-windows-msvc
             -   name: Upload artifacts to release
-                uses: actions/upload-release-asset@v1
+                uses: xresloader/upload-to-github-release@v1
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 with:
-                    upload_url: "https://uploads.github.com/repos/Pulsar-Dev/link-tickets/releases/latest/assets?name=ticket-bot-linux-x86_64"
-                    asset_path: ./ticket-bot-linux-x86_64
-                    asset_name: ticket-bot-linux-x86_64
-                    asset_content_type: 'application/octet-stream'
+                    file: ticket-bot-linux-x86_64
+                    update_latest_release: true
