@@ -2,32 +2,70 @@ name: Compile binaries
 
 on:
     release:
-        types: [published]
+        types: [ published ]
 
 jobs:
     compile:
         name: Compile binaries
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout
-              uses: actions/checkout@v3
-            - name: Setup Deno
-              uses: denoland/setup-deno@v1
-              with:
-                deno-version: v1.x
-            - name: Compile
-              run: deno task compile
-            - name: Upload
-              uses: actions/upload-artifact@v2
-              with:
-                  name: ticket-bot-linux-x86_64
-                  retention-days: 1
-                  path: ticket-bot-linux-x86_64
-            - name: Upload to release
-              uses: xresloader/upload-to-github-release@v1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.RELASE_TOKEN }}
-              with:
-                 file: ticket-bot-linux-x86_64
-                 update_latest_release: true
+            -   name: Checkout
+                uses: actions/checkout@v3
+            -   name: Setup Deno
+                uses: denoland/setup-deno@v1
+                with:
+                    deno-version: v1.x
+            -   name: Compile
+                run: deno task compile
+            -   name: Upload Linux binary
+                uses: actions/upload-artifact@v3
+                with:
+                    name: ticket-bot-linux-x86_64
+                    path: ./ticket-bot-linux-x86_64
+            -   name: Upload Windows binary
+                uses: actions/upload-artifact@v3
+                with:
+                    name: ticket-bot-windows-msvc
+                    path: ./ticket-bot-windows-msvc.exe
+    upload:
+        needs: compile
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Download artifacts
+                uses: actions/download-artifact@v3
+                with:
+                    name: ticket-bot-linux-x86_64
+            -   name: Download artifacts
+                uses: actions/download-artifact@v3
+                with:
+                    name: ticket-bot-windows-msvc
+            -   name: Upload artifacts to release
+                uses: actions/github-script@v7
+                with:
+                    github-token: ${{ secrets.GITHUB_TOKEN }}
+                    script: |
+                        const fs = require('fs');
+                        const path = require('path');
+                        const { owner, repo, number: release_id } = context.repo;
 
+                        const artifacts = [
+                            'ticket-bot-linux-x86_64',
+                            'ticket-bot-windows-msvc.exe'
+                        ];
+
+                        for (const artifact of artifacts) {
+                            const artifactPath = path.join(process.env.GITHUB_WORKSPACE, artifact);
+                            const data = fs.readFileSync(artifactPath);
+
+                            await github.action_repository.uploadReleaseAsset({
+                                owner,
+                                repo,
+                                release_id,
+                                name: path.basename(artifact),
+                                data: data,
+                                headers: {
+                                    'content-length': data.length,
+                                    'content-type': 'application/octet-stream',
+                                },
+                            });
+                        }
