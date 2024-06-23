@@ -29,8 +29,6 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                 file: |
-                     ticket-bot-linux-x86_64
-                     ticket-bot-windows-msvc.exe
+                 file: binaries
                  update_latest_release: true
 
