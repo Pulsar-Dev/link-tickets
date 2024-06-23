@@ -39,12 +39,10 @@ jobs:
                 uses: actions/download-artifact@v4
                 with:
                     name: ticket-bot-windows-msvc
-            -   name: Upload artifacts to release
-                uses: xresloader/upload-to-github-release@v1
-                env:
-                    GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+            -   name: Upload Linux binary to release
+                uses: ncipollo/release-action@v1
                 with:
                     token: ${{ secrets.RELEASE_TOKEN }}
-                    file: ticket-bot-linux-x86_64
-                    update_latest_release: true
-                    target_repo: 'Pulsar-Dev/link-tickets'
+                    artifacts: "ticket-bot-linux-x86_64"
+                    artifactErrorsFailBuild: true
+                    allowUpdates: true
