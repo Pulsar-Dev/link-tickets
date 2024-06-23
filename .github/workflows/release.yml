@@ -1,0 +1,36 @@
+name: Compile binaries
+
+on:
+    release:
+        types: [published]
+
+jobs:
+    compile:
+        name: Compile binaries
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Setup Deno
+              uses: denoland/setup-deno@v1
+              with:
+                deno-version: v1.x
+            - name: Compile
+              run: deno task compile
+            - name: Upload
+              uses: actions/upload-artifact@v2
+              with:
+                  name: binaries
+                  path: |
+                      ./ticket-bot-linux-x86_64
+                      ./ticket-bot-windows-msvc.exe
+            - name: Upload to release
+              uses: xresloader/upload-to-github-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                 file: |
+                     ./ticket-bot-linux-x86_64
+                     ./ticket-bot-windows-msvc.exe
+                 update_latest_release: true
+

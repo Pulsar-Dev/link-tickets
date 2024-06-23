@@ -2,9 +2,9 @@
   "tasks": {
     "dev": "deno run --watch --allow-all mod.ts",
     "fmt": "deno fmt",
-    "compile": "deno compile --allow-all mod.ts",
-    "compile:linux": "deno compile --target x86_64-unknown-linux-gnu --allow-all mod.ts",
-    "compile:windows": "deno compile --target x86_64-pc-windows-msvc --allow-all mod.ts"
+    "compile": "deno task compile:linux && deno task compile:windows",
+    "compile:linux": "deno compile --target x86_64-unknown-linux-gnu --output ticket-bot-linux-x86_64 --allow-all mod.ts",
+    "compile:windows": "deno compile --target x86_64-pc-windows-msvc --output ticket-bot-windows-msvc --allow-all mod.ts"
   },
   "imports": {
     "@db/sqlite": "jsr:@db/sqlite@^0.11.1",
