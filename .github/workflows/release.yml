@@ -44,7 +44,7 @@ jobs:
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 with:
-                    upload_url: "https://uploads.github.com/repos/Pulsar-Dev/link-tickets/releases/latest/assets"
+                    upload_url: "https://uploads.github.com/repos/Pulsar-Dev/link-tickets/releases/latest/assets?name=ticket-bot-linux-x86_64"
                     asset_path: ./ticket-bot-linux-x86_64
                     asset_name: ticket-bot-linux-x86_64
                     asset_content_type: 'application/octet-stream'
