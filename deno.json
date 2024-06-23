@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "dev": "deno run --watch --allow-all mod.ts",
+    "fmt": "deno fmt",
+    "compile": "deno compile --target x86_64-unknown-linux-gnu --output pulsar_link_tickets-linux_x86_64 --allow-all mod.ts"
+  },
+  "imports": {
+    "@db/sqlite": "jsr:@db/sqlite@^0.11.1",
+    "@deno-lib/logger": "jsr:@deno-lib/logger@^1.1.6",
+    "@harmony/harmony": "jsr:@harmony/harmony@^2.9.1",
+    "@std/dotenv": "jsr:@std/dotenv@^0.224.1"
+  }
+}
