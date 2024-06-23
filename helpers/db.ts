@@ -12,9 +12,9 @@ export async function insert(
   creator: string
 ): Promise<void> {
   database.execute(`
-      INSERT INTO tickets (ticket_id, channel_id, creator)
+      INSERT OR IGNORE INTO tickets (ticket_id, channel_id, creator)
       VALUES ('${ticket_id}', '${channel_id}', '${creator}');
-    `);
+  `);
 }
 
 export async function get(channel_id: string): Promise<DatabaseTicket> {
@@ -60,7 +60,7 @@ export async function getMessagePulsarId(message_id: string): Promise<string> {
 
 export async function setUserCache(discord_id: string, pulsar_id: string): Promise<void> {
   database.execute(`
-      INSERT INTO user_cache (discord_id, pulsar_id)
+      INSERT OR REPLACE INTO user_cache (discord_id, pulsar_id)
       VALUES ('${discord_id}', '${pulsar_id}');
   `);
 }

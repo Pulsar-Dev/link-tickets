@@ -15,11 +15,11 @@ import {get, insert, remove, setUserCache} from "../helpers/db.ts";
 import {
   APITicket,
   APITicketStatus,
-  APIUser,
+  APIUser, APIUserAddon, APIUserAddons,
   close,
   create,
   get as APIGet,
-  getUser,
+  getUser, getUserAddons,
   hold,
   unhold
 } from "../helpers/api.ts";
@@ -83,20 +83,24 @@ export class TicketCommandsModule extends ApplicationCommandsModule {
   async create(interaction: Interaction): Promise<void> {
     if (!interaction.isApplicationCommand()) {
       interaction.reply("What the fuck. This should never happen?", {ephemeral: true});
+      logger.error("Error creating ticket: Interaction is not an application command.")
       return;
     }
     if (!interaction.member?.user) {
       interaction.reply("You must be in a server to use this command.", {ephemeral: true});
+      logger.error("Error creating ticket: interaction.member.user is undefined")
       return;
     }
 
     if (!interaction.guild) {
       interaction.reply("You must be in a server to use this command.", {ephemeral: true});
+      logger.error("Error creating ticket: interaction.guild is undefined")
       return;
     }
 
     if (!interaction.options[0]?.value) {
       interaction.reply("Missing addon. Please create the ticket by specifying an addon.", {ephemeral: true});
+      logger.error("Error creating ticket: Missing addon option")
       return;
     }
 
@@ -104,6 +108,7 @@ export class TicketCommandsModule extends ApplicationCommandsModule {
 
     if (apiUser.error) {
       interaction.reply("An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API fetch failed: ", apiUser.error);
       return;
     }
 
@@ -111,6 +116,7 @@ export class TicketCommandsModule extends ApplicationCommandsModule {
 
     if (!apiUserData) {
       interaction.reply("An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API fetch failed: ", apiUserData);
       return;
     }
 
@@ -118,10 +124,46 @@ export class TicketCommandsModule extends ApplicationCommandsModule {
 
     if (apiUserResponse.error) {
       interaction.reply("You have not verified. Please verify to create tickets.", {ephemeral: true});
+      logger.error("Error creating ticket: API returned error: ", apiUserResponse.error);
       return;
     }
 
-    await setUserCache(interaction.member.user.id, apiUserResponse.id!)
+    setUserCache(interaction.member.user.id, apiUserResponse.id!)
+
+    const apiUserAddons = await getUserAddons(apiUserResponse.id!);
+    if (apiUserAddons.error) {
+      interaction.reply("An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API returned error for user addons: ", apiUser.error);
+      return;
+    }
+
+    const apiUserAddonsData = apiUserAddons.data;
+
+    if (!apiUserAddonsData) {
+      interaction.reply("An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API fetch failed for user addons: ", apiUserAddonsData);
+      return;
+    }
+
+    if (!apiUserAddonsData.ok) {
+      interaction.reply("An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API request failed for user addons: ", apiUserAddonsData);
+      return;
+    }
+
+    const apiUserAddonsResponse: APIUserAddons = await apiUserAddonsData.json();
+
+    if (!apiUserAddonsResponse || apiUserAddonsResponse.length === 0) {
+      interaction.reply("You do not own any addons. Please purchase an addon to create a ticket for it.", {ephemeral: true});
+      return;
+    }
+
+    const userOwnsAddon = Boolean(apiUserAddonsResponse.find((addon: APIUserAddon) => addon.id === interaction.options[0].value));
+
+    if (!userOwnsAddon) {
+      interaction.reply("You do not own this addon. Please purchase the addon to create a ticket for it.", {ephemeral: true});
+      return;
+    }
 
     const apiTicket = await create(
       interaction.member.user.id,
@@ -130,6 +172,7 @@ export class TicketCommandsModule extends ApplicationCommandsModule {
 
     if (apiTicket.error) {
       interaction.reply("An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API fetch failed for ticket: ", apiTicket.error);
       return;
     }
 
@@ -137,19 +180,26 @@ export class TicketCommandsModule extends ApplicationCommandsModule {
 
     if (!data) {
       interaction.reply("An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API fetch failed for ticket: ", data);
       return;
     }
 
     const response: TicketCreateResponse = await data.json();
 
     if (data.status == 400) {
+      if (response.error === "User already has an open ticket for this addon.") {
+        interaction.reply("You already have an open ticket for this addon.", {ephemeral: true});
+        return;
+      }
+
       interaction.reply("An error occurred whilst creating the ticket.", {ephemeral: true});
-      logger.error(response);
+      logger.error("Error creating ticket: API returned 400: ", response.error);
       return;
     }
 
     if (!response || !response.id || response.error) {
       interaction.reply(response.error || "An unknown error has occurred whilst creating the ticket.", {ephemeral: true});
+      logger.error("Error creating ticket: API returned error: ", response.error);
       return;
     }
 

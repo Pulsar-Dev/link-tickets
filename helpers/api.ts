@@ -37,6 +37,13 @@ export interface APIUser {
   error?: string;
 }
 
+export interface APIUserAddon {
+  id?: string;
+  name?: string;
+}
+
+export type APIUserAddons = APIUserAddon[]
+
 export async function getUser(user_id: string): Promise<APIResponse> {
   const url = new URL(`${urlBase}/user/${user_id}/discord`);
 
@@ -53,6 +60,25 @@ export async function getUser(user_id: string): Promise<APIResponse> {
   } catch (err) {
     return {error: Error(err)};
   }
+}
+
+export async function getUserAddons(user_id: string): Promise<APIResponse> {
+  const url = new URL(`${urlBase}/user/${user_id}/addons`);
+
+  try {
+    const data = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `${Deno.env.get("API_TOKEN")}`,
+      },
+    });
+
+    return {data};
+  } catch (err) {
+    return {error: Error(err)};
+  }
+
 }
 
 export async function create(user_id: string, addon_id: string): Promise<APIResponse> {
