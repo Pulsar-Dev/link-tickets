@@ -43,6 +43,8 @@ jobs:
                 uses: ncipollo/release-action@v1
                 with:
                     token: ${{ secrets.RELEASE_TOKEN }}
-                    artifacts: "ticket-bot-linux-x86_64"
+                    artifacts: |
+                        ticket-bot-linux-x86_64
+                        ticket-bot-windows-msvc
                     artifactErrorsFailBuild: true
                     allowUpdates: true
