@@ -26,7 +26,7 @@ import {
   unhold
 } from "../helpers/api.ts";
 
-const addons: Addon[] = await fetch("http://localhost:8080/addons", {
+const addons: Addon[] = await fetch(`${Deno.env.get("API_URL")!}/addons`, {
   method: "GET",
   headers: {
     "Authorization": `${Deno.env.get("API_TOKEN")}`,
